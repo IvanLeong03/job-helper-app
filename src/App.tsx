@@ -1,5 +1,5 @@
 import { useState } from 'react'
-import { analyseFit } from './services/analyseService'
+import { fakeAnalyseFit } from './services/analyseService'
 import type { CVRewrite, AnalysisResponse } from './types'
 
 function App() {
@@ -10,9 +10,10 @@ function App() {
 
     async function handleSend() {
         setLoading(true)
-
         try {
-            const data = await analyseFit(input)
+            //const data = await analyseFit(input)
+            await new Promise(r => setTimeout(r, 3000))
+            const data = await fakeAnalyseFit(input)
             setResponse(data)            
         } catch {
             console.error('Please try again')
@@ -31,17 +32,16 @@ function App() {
     return (
         <div className="w-full min-h-screen bg-darkest">
             <main className="w-4/5 max-w-384 mx-auto py-24 flex flex-col items-center">
-                <div className="text-3xl md:text-5xl font-bold text-lightest">
+                <div className="text-3xl md:text-5xl font-bold text-accent">
                     employmentmaxxing (temporary name)
                 </div>
                 <h2 className="text-xl text-white/60 mt-8">
                     Paste job description and get CV suggestions and general advice
                 </h2>
                 <div>
-                    {/* doesn't do anything yet*/}
-                    <button className='text-white/60 text-lg hover:underline my-16 px-4 rounded-xl  border border-dashed border-lightest'>
+                    <button className='text-dark/80 text-lg hover:underline my-16 px-4 py-2 rounded-xl bg-lightest'>
                         Edit my CV
-                        { /* open another page which contains the generic cv? */}
+                        { /* open a modal which contains the generic cv? */}
                     </button>
                 </div>
                 <textarea 
@@ -54,7 +54,7 @@ function App() {
 
                 <button 
                     type='button'
-                    className="text-lg rounded-xl px-8 py-2 text-lightest/80 hover:text-lightest bg-medium mt-8 mb-24"
+                    className="w-40 md:w-80 text-lg rounded-xl py-2 text-accent/80 hover:text-accent bg-medium mt-8 mb-24"
                     disabled={!input.trim() || loading}
                     onClick={() => handleSend()}
                 >
@@ -62,7 +62,7 @@ function App() {
                 </button>
 
                 {loading && (
-                    <p className='text-white/80'>Waiting for response</p>
+                    <div className='w-10 h-10 rounded-full border-4 border-white/20 border-t-white/80 animate-spin' />
                 )}
 
                 {error && (
@@ -70,8 +70,8 @@ function App() {
                 )}
 
                 {response && (
-                    <section className='flex flex-col items-center'>
-                        <div className='rounded-xl w-2/3 bg-lightest/80 p-2 flex flex-col gap-6 justify-start'>
+                    <section className='w-2/3 flex flex-col items-center'>
+                        <div className='w-full rounded-xl bg-lightest/80 p-2 flex flex-col gap-6 justify-start'>
                             <div>
                                 <h3 className='text-sm font-semibold text-dark'>Fit score</h3>
                                 {response.fit_score}
@@ -80,8 +80,7 @@ function App() {
                                 <h3 className='text-sm font-semibold mb-1 text-dark'>Fit explanation</h3>
                                 <p className='leading-relaxed'>
                                     {response.fit_reasoning}
-                                </p>
-                                
+                                </p>                                
                             </div>
                             <div>
                                 <h3 className='text-sm font-semibold mb-1 text-dark'>Your strengths</h3>
@@ -108,18 +107,25 @@ function App() {
                                 </ul>  
                             </div>
                             {/* rewrites: each object has 2 parts */}
-                            <div className="text-sm font-semibold mt-8 text-dark">CV edits</div>
-                            {response.cv_rewrites.map((rewrite: CVRewrite, i) => (
-                                <div className="mb-4" key={i}>
-                                    <p><b>Original:</b> {rewrite.original}</p>
-                                    <p><b>Suggested:</b> {rewrite.suggested}</p>
-                                </div>                            
-                            ))}
+                            <div className="mb-4">
+                                <h3 className="text-sm font-semibold mb-1 text-dark">CV edits</h3>
+                                {response.cv_rewrites.length > 0 ? (
+                                    response.cv_rewrites.map((rewrite: CVRewrite, i) => (
+                                        <div className="mb-4" key={i}>
+                                            <p><b>Original:</b> {rewrite.original}</p>
+                                            <p><b>Suggested:</b> {rewrite.suggested}</p>
+                                        </div>                            
+                                    ))
+                                ) : (
+                                    <p>No suggested edits</p>                                
+                                )}
+                            </div>
+                            
                         </div>
 
                         <button
                             onClick={() => resetPage()}
-                            className='px-4 py-2 bg-light rounded-xl my-4 hover:text-white/75'
+                            className='w-40 md:w-80 py-2 bg-light rounded-xl my-4 hover:text-white/75'
                         >
                             Clear
                         </button>
