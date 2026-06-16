@@ -1,48 +1,100 @@
-import { useState } from 'react'
-import { fakeAnalyseFit } from './services/analyseService'
+import { useEffect, useState } from 'react'
+import { analyseFit } from './services/analyseService'
 import type { CVRewrite, AnalysisResponse } from './types'
+import { loadCV, saveCV } from './services/cvService'
 
 function App() {
     const [input, setInput] = useState('')
     const [loading, setLoading] = useState(false)
     const [response, setResponse] = useState<AnalysisResponse | null>(null)
     const [error, setError] = useState('')
+    const [editModalOpen, setEditModalOpen] = useState(false)
+    const [cvContent, setCvContent] = useState('')
 
     async function handleSend() {
         setLoading(true)
         try {
             //const data = await analyseFit(input)
             await new Promise(r => setTimeout(r, 3000))
-            const data = await fakeAnalyseFit(input)
+            const data = await analyseFit(input)
             setResponse(data)            
         } catch {
-            console.error('Please try again')
-            setError(error)
+            setError('Please try again')
         } finally {
             setLoading(false)
         }
-
     }
+
+    async function getCV() {
+        try {
+            //const data = await analyseFit(input)
+            const data = await loadCV()
+            setCvContent(data.content)            
+        } catch {
+            setError('Failed to load CV')
+        } 
+    }
+
+    async function handleSaveCv() {
+        try {
+            await saveCV(cvContent)            
+        } catch {
+            setError('Failed to save CV')
+        } finally {
+            editModal()
+        }
+    }
+
+    useEffect(() => {
+        getCV()
+    }, []) //empty: run on mount only
 
     function resetPage() {
         setInput('')
         setResponse(null)
     }
 
+    function editModal() {
+        setEditModalOpen(!editModalOpen)
+    }
+
     return (
         <div className="w-full min-h-screen bg-darkest">
             <main className="w-4/5 max-w-384 mx-auto py-24 flex flex-col items-center">
                 <div className="text-3xl md:text-5xl font-bold text-accent">
-                    employmentmaxxing (temporary name)
+                    Job Application Helper
                 </div>
                 <h2 className="text-xl text-white/60 mt-8">
-                    Paste job description and get CV suggestions and general advice
+                    Paste job description and get CV feedback
                 </h2>
-                <div>
-                    <button className='text-dark/80 text-lg hover:underline my-16 px-4 py-2 rounded-xl bg-lightest'>
-                        Edit my CV
+                <div className='relative w-full flex flex-col items-center'>
+                    <button
+                        className='hover:cursor-pointer text-lg my-16 px-8 py-2 rounded-2xl bg-light text-accent/80 hover:text-accent'
+                        onClick={() => editModal()}
+                    >
+                        Edit CV
                         { /* open a modal which contains the generic cv? */}
                     </button>
+                    {editModalOpen && (
+                        <div className="rounded-xl absolute z-0 top-32 left-1/2 -translate-x-1/2 bg-lightest w-2/3 max-w-5xl p-4 mx-auto flex flex-col">
+                            <h3 className='text-dark text-lg font-medium'>Your CV:</h3>
+                            <ul className='list-disc list-inside ml-1'>
+                                <li>Use plain markdown</li>
+                                <li>Separation sections by ## headings</li>
+                            </ul>
+                            <textarea 
+                                className='rounded-xl overflow-y-auto min-h-[50dvh] bg-white/75 focus:outline-hidden p-2' 
+                                value={cvContent}
+                                onChange={(e) => setCvContent(e.target.value)}
+                            />
+                            <button
+                                onClick={() => handleSaveCv()}
+                                className='hover:underline hover:text-darkest my-4'
+                            >
+                                Save and close
+                            </button>
+                        </div>
+                    )}
                 </div>
                 <textarea 
                     className="w-2/3 rounded-xl bg-white/90 min-h-[50dvh] px-3 py-2 focus:outline-hidden focus:border-lighter transition-colors overflow-y-scroll"
@@ -54,11 +106,11 @@ function App() {
 
                 <button 
                     type='button'
-                    className="w-40 md:w-80 text-lg rounded-xl py-2 text-accent/80 hover:text-accent bg-medium mt-8 mb-24"
+                    className="w-40 md:w-80 text-lg rounded-2xl py-2 text-accent/80 hover:text-accent bg-medium mt-8 mb-24"
                     disabled={!input.trim() || loading}
                     onClick={() => handleSend()}
                 >
-                    Rate my chances
+                    Submit
                 </button>
 
                 {loading && (
@@ -71,7 +123,7 @@ function App() {
 
                 {response && (
                     <section className='w-2/3 flex flex-col items-center'>
-                        <div className='w-full rounded-xl bg-lightest/80 p-2 flex flex-col gap-6 justify-start'>
+                        <div className='w-full rounded-xl bg-lightest/80 p-4 flex flex-col gap-6 justify-start'>
                             <div>
                                 <h3 className='text-sm font-semibold text-dark'>Fit score</h3>
                                 {response.fit_score}
@@ -83,7 +135,7 @@ function App() {
                                 </p>                                
                             </div>
                             <div>
-                                <h3 className='text-sm font-semibold mb-1 text-dark'>Your strengths</h3>
+                                <h3 className='text-sm font-semibold mb-1 text-dark'>Strengths</h3>
                                 <ul className='list-disc list-inside'>
                                     {response.strengths.map((s: string, i) => (
                                         <li key={i}>{s}</li>
@@ -91,7 +143,7 @@ function App() {
                                 </ul>                            
                             </div>
                             <div>
-                                <h3 className='text-sm font-semibold mb-1 text-dark'>Your weaknesses</h3>
+                                <h3 className='text-sm font-semibold mb-1 text-dark'>Weaknesses</h3>
                                 <ul className='list-disc list-inside'>
                                     {response.weaknesses.map((w: string, i) => (
                                         <li key={i}>{w}</li>
@@ -99,7 +151,7 @@ function App() {
                                 </ul>                            
                             </div>
                             <div>
-                                <h3 className='text-sm font-semibold mb-1 text-dark'>Job Requirements</h3>
+                                <h3 className='text-sm font-semibold mb-1 text-dark'>Key Requirements</h3>
                                 <ul className='list-disc list-inside'>
                                     {response.requirements.map((r: string, i) => (
                                         <li key={i}>{r}</li>
@@ -133,9 +185,14 @@ function App() {
                     </section>
                 )}
                 
-                {/* 
-                <a className="text-white/60 my-16">How it works</a>
-                */}
+                <a
+                    href="https://github.com/IvanLeong03/job-helper-app"
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="text-white/60 my-16 hover:underline"
+                >
+                    How it works
+                </a>
 
             </main>
             

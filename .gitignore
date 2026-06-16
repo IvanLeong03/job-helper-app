@@ -26,3 +26,9 @@ dist-ssr
 # Environment files
 .env
 backend/.env
+
+# Generated artifacts
+backend/chroma_db/
+backend/.venv/
+
+CLAUDE.md
