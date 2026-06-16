@@ -1,7 +1,10 @@
+import sys
+import os
+sys.path.insert(0, os.path.dirname(__file__))
 import chromadb
 from sentence_transformers import SentenceTransformer
 
-from backend.config import CHROMA_PATH, COLLECTION_NAME
+from config import CHROMA_PATH, COLLECTION_NAME
 
 _model: SentenceTransformer | None = None
 _collection: chromadb.Collection | None = None

@@ -1,10 +1,13 @@
 from pathlib import Path
+import sys
+import os
+sys.path.insert(0, os.path.dirname(__file__))
 
 from fastapi import APIRouter, HTTPException
 from pydantic import BaseModel
 
-from backend.ingest import build_collection, load_chunks
-from backend.services.retriever import _get_model
+from ingest import build_collection, load_chunks
+from services.retriever import _get_model
 
 CV_PATH = Path(__file__).parent.parent / "data" / "cv.md"
 

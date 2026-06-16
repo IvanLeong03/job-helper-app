@@ -1,6 +1,8 @@
+const API_URL = import.meta.env.VITE_API_URL ?? 'http://localhost:8000'
+
 export async function analyseFit(jobDescription: string) {
 
-    const response = await fetch('/api/analyse', {
+    const response = await fetch(`${API_URL}/analyse`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json'},
         body: JSON.stringify({ job_description: jobDescription })

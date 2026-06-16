@@ -1,8 +1,12 @@
+import sys
+import os
+sys.path.insert(0, os.path.dirname(__file__))
+
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 
-from backend.routers.analyse import router as analyse_router
-from backend.routers.cv import router as cv_router
+from routers.analyse import router as analyse_router
+from routers.cv import router as cv_router
 
 app = FastAPI()
 

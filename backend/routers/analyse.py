@@ -1,8 +1,11 @@
+import sys
+import os
+sys.path.insert(0, os.path.dirname(__file__))
 from fastapi import APIRouter
 
-from backend.models import AnalyseRequest, AnalysisResponse
-from backend.services.analyser import analyse as run_analysis
-from backend.services.retriever import retrieve
+from models import AnalyseRequest, AnalysisResponse
+from services.analyser import analyse as run_analysis
+from services.retriever import retrieve
 
 router = APIRouter()
 

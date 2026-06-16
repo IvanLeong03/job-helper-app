@@ -1,9 +1,12 @@
 import json
+import sys
+import os
+sys.path.insert(0, os.path.dirname(__file__))
 
 import anthropic
 
-from backend.config import ANTHROPIC_API_KEY
-from backend.models import AnalysisResponse, CVRewrite
+from config import ANTHROPIC_API_KEY
+from models import AnalysisResponse, CVRewrite
 
 _client: anthropic.Anthropic | None = None
 

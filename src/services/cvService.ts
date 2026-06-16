@@ -1,5 +1,8 @@
+const API_URL = import.meta.env.VITE_API_URL ?? 'http://localhost:8000'
+
+
 export async function loadCV() {
-    const response = await fetch('/api/cv', {
+    const response = await fetch(`${API_URL}/cv`, {
         method: 'GET',
         headers: { 'Content-Type': 'application/json'}
     })
@@ -10,7 +13,7 @@ export async function loadCV() {
 }
 
 export async function saveCV(cvContent: string) {
-    const response = await fetch('/api/cv', {
+    const response = await fetch(`${API_URL}/cv`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json'},
         body: JSON.stringify({ content: cvContent })
